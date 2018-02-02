@@ -1,0 +1,46 @@
+{% extends "_layout.html" %}
+{% block body %}
+    <h2>Configuration</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-hover">
+                <tbody>
+                    <tr>
+                        <td colspan="2"><strong>Cloud Foundry</strong></td>
+                    </tr>
+                    <tr>
+                        <td>API Host</td>
+                        <td><a href="{{ config.autoscaler_api_url + '/spaces/manage' }}">{{ config.autoscaler_api_url }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Org / Space</td>
+                        <td>{{ cf_config['org_name'] }} / {{ cf_config['space_name'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Org GUID</td>
+                        <td>{{ cf_config['org_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Space GUID</td>
+                        <td>{{ cf_config['space_id'] }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>Scaling</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Scaling Interval</td>
+                        <td>{{ cf_config['scaling_interval'] }} seconds</td>
+                    </tr>
+                    <tr>
+                        <td>Stats Collecting Interval</td>
+                        <td>{{ cf_config['stats_interval'] }} seconds</td>
+                    </tr>
+                    <tr>
+                        <td>Monitoring Interval</td>
+                        <td>{{ config.scaling_monitor_interval }} seconds</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

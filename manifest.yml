@@ -1,0 +1,16 @@
+applications:
+- name: cfas-web
+  random-route: true
+  path: .
+  instances: 1
+  memory: 128M
+  disk_quota: 192M
+  buildpack: python_buildpack
+  stack: cflinuxfs2
+  command: python server.py
+  env:
+    CFAS_ORG_NAME: 
+    CFAS_SPACE_NAME: 
+    CFAS_API_URL: 
+    CFAS_TOKEN: 
+    CFAS_SECRET: 

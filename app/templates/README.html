@@ -1,0 +1,404 @@
+<h1>Cloud Foundry Autoscaler</h1>
+<p>This is an example autoscaler for Cloud Foundry applications. You can use it as
+is or you can modify it to suit your needs.</p>
+<h2>Features</h2>
+<p>Here's a list of things you get out of the box:</p>
+<ul>
+<li>Web-based portal for autoscaling management</li>
+<li>Real-time app performance monitoring</li>
+<li>Autoscaling algorithm with user interface for tuning autoscaling
+parameters</li>
+<li>Manually scale your app in memory, disk, or number of instances</li>
+</ul>
+<h2>How the autoscaling works</h2>
+<p>The default autoscaling algorithm follows these steps to determine
+ whether to scale up, scale down, or do nothing.</p>
+<ol>
+<li>Collect average memory, CPU, and disk metrics across all instances
+ in the Cloud Foundry app on the configured interval <code>scaling.monitor_interval</code>.</li>
+<li>Select all memory, CPU, and disk metrics collected over the configured interval 
+ <code>scaling.interval</code>.</li>
+<li>The autoscaling algorithms provided out of the box use a 
+<a href="https://en.wikipedia.org/wiki/Linear_regression">"linear regression"</a> 
+    to check if the trend in CPU or memory is upward. If the trend is 
+    such that over the next <code>scaling.interval</code> the CPU or memory will
+    exceed "% CPU High" OR "% Memory High", then the autoscaler will 
+    attempt to scale the app up. Because of this, please note that the 
+    app may not immediately be exceeding the high limits when it scales 
+    up. If the trend is not upward, and both the average CPU and memory 
+    over the <code>scaling.interval</code> are less than "% CPU Low" AND 
+    "% Memory Low", then the app will be scaled down. Because of this,
+    please note that the app may not immediately scale down if the 
+    current average CPU and memory are below the "% CPU Low" and 
+    "% Memory Low"; also, note that the app will not scale down until 
+    both CPU AND memory are lower than their respective "% CPU Low" and 
+    "% CPU Memory" settings. If neither of the above conditions are 
+    matched, then no action is taken.<ul>
+<li><strong>CPU Based Autoscaling</strong> - This algorithm only scales based on the 
+linear regressed trend in CPU or in extreme cases, memory. This strategy
+is useful for Java based apps which will often use a high percentage (~ 90%) of 
+the memory in the deployment. The above description applies to this strategy
+with the exception of the memory constraints described. Ultimately memory 
+will be scaled if the total usage exceeds 93% over the <code>scaling.interval</code>.</li>
+<li><strong>Threshold Based Autoscaling</strong> - This algorithm scales based on both CPU
+and memory as described in the above description. This strategy is a
+more generic autoscaling algorithm that has shown good results with 
+Python and Node.js apps.</li>
+</ul>
+</li>
+<li>Step 1 is repeated independently every <code>scaling.monitor_interval</code>.</li>
+<li>Steps 2 - 3 are repeated independently every <code>scaling.interval</code>.</li>
+</ol>
+<h2>Autoscaling Workflow</h2>
+<p>This is a brief description of how to use the autoscaler.</p>
+<h3>Sign in</h3>
+<p><a href="/signin">Sign in</a> at the user interface with the <a href="#config-auth">username and password</a> 
+from the <code>auth</code> section of the config.</p>
+<h3>Authorize the Autoscaler with Cloud Foundry</h3>
+<p>You will be directed to authorize the autoscaler with Cloud Foundry. This
+will involve logging in to the Cloud Foundry UAA server and consenting to authorize
+the autoscaler to manage your apps. If you choose to withhold any of the permissions
+requested the autoscaler may not function properly. The user who authorizes the
+autoscaler must be an OrgManager in the space where the autoscaler is deployed. Note
+also that the user who performs this authorization <em>must</em> have permissions to perform
+the actions that the autoscaler performs. If the user who authorizes does not have
+sufficient permissions the authorization may appear to be successful, but the
+Access/Refresh Token granted by the UAA server to the autoscaler may not be properly
+authorized and so the autoscaler may not function properly.</p>
+<h3>Import Apps for Autoscaling</h3>
+<p>If you're not monitoring any apps, you will be redirected to
+<a href="/apps/available">Available Apps</a> to "Import" any apps you want to monitor for
+autoscaling.</p>
+<h3>Enable Apps for Autoscaling</h3>
+<p>By default, when an app is imported, autoscaling is disabled. You can enable
+autoscaling in one of two ways. 1) by going to the <a href="/">home page</a>, finding the
+app, and selecting "Enable" OR 2) by viewing the app directly (<code>/apps/&lt;app_id&gt;</code>)
+and selecting the "Enable autoscaling" button beneath the app name.</p>
+<h3>Monitor Apps with Autoscaling</h3>
+<p>Once you've imported and enabled an app for autoscaling, you can watch it's
+performance on the <code>/apps/&lt;app_id&gt;</code> page. The app page provides charts and a
+form for modifying autoscaling parameters as well as managing the app's scale manually.</p>
+<h4>Charts</h4>
+<ul>
+<li>The "Num Instances" chart shows the number of Cloud Foundry instances running
+your app. This chart is good for watching scaling activity as well.</li>
+<li>The "CPU &amp; Memory Usage" chart shows the app's average CPU and Memory usage of
+your app across all instances.</li>
+<li>
+<p>The "Average CPU Usage" and "Average Memory Usage" gauges are a quick view of
+how your app is performing.</p>
+</li>
+<li>
+<p>The "Instance CPU, Memory, and Disk Usage" chart is good for seeing how the instances running your
+app are performing.</p>
+</li>
+</ul>
+<h4>Scaling Parameters</h4>
+<ul>
+<li>The "Auto Scaling Parameters" offers
+controls for how the autoscaler makes scaling decisions. The Memory/CPU Low/High
+parameters are upper and lower bounds of Memory/CPU, respectively, which the
+autoscaler will use to decide when to scale up or down. The Min/Max Number of Instances
+are used to set the min/max number of instances that the autoscaler will scale to.</li>
+<li>The "Manual Scaling Parameters" offers
+controls to manually scale the app if you want to disable autoscaling.</li>
+</ul>
+<h2>Autoscaling Tuning Hints</h2>
+<h3>Autoscaling Strategy</h3>
+<p>Java based apps will benefit most from the <strong>CPU Based Autoscaling</strong>.
+Other apps will probably fine with the <strong>Threshold Based Autoscaling</strong>.</p>
+<h3>CPU Low / High</h3>
+<p>For scaling up, 70-90 % CPU usage is a good level to start scaling up the number of instances.
+For scaling down, 50-70 % CPU usage is a good level to start scaling down the number of instances.</p>
+<h3>Memory Low / High</h3>
+<p>For scaling up, 70-85 % Memory usage is a good level to start scaling up the number of instances.
+For scaling down, 50-65 % Memory usage is a good level to start scaling down the number of instances.</p>
+<h3>Number of Instances Min / Max</h3>
+<p>In the interest of maintaining high availability, 2 instances is a good minimum to scale down to.
+For scaling up, if your app is rather high in Memory/Disk usage, you may want to set the max number of instances
+lower in the interest of not using too much Memory/Disk in your Organization.
+If your app is light and small in Memory/Disk usage, you can set this value higher to allow
+more room for autoscaling to optimize the number of instances to sustain the current load on your application.</p>
+<h2>Pages</h2>
+<h3>Apps</h3>
+<p><a href="/">/ (Home)</a></p>
+<p>This page lists all the apps that you have imported for autoscaling.</p>
+<h3>Available Apps</h3>
+<p><a href="/apps/available">/apps/available</a></p>
+<p>This page lists all the neighboring apps available in this Cloud Foundry space
+excluding the apps that you have imported.</p>
+<h3>App Monitoring View</h3>
+<p><code>/apps/&lt;app_id&gt;</code></p>
+<p>This page provides detailed monitoring of the app's overall performance in CPU,
+Memory, and Disk, as well as a chart breaking down the individual instance
+performance. Tooltips on each part of this page should explain in more detail
+what each component represents.</p>
+<h3>App Monitoring View</h3>
+<p><code>/apps/&lt;app_id&gt;/history</code></p>
+<p>This page provides a history of the app's performance over the past 7 days. You 
+can view relationship between the scaling activity and the CPU and Memory usage.
+There is a larger chart with the full data, and a smaller chart below it that 
+allows you to select a smaller subset of the data. Once you select a window of 
+data, a higher resolution set of data will replace that view in the larger 
+chart. You can also drag the window to the left and right to inspect other 
+parts of the whole interval that's in view.</p>
+<h2>Architecture</h2>
+<p>For the purpose of the following explanation, "the apps" indicate the apps that
+you want to autoscale.</p>
+<p>The autoscaler application consists of a web frontend and a worker backend.
+PostgreSQL DB is used for tracking imported Cloud Foundry apps, app performance
+statistics, job scheduling, and sessions.</p>
+<p>The web frontend provides an interface for monitoring the apps in real-time and
+tuning autoscaling parameters. The worker backend runs scheduled jobs that
+collect app performance statistics and check periodically if the app needs to
+be scaled. On every autoscaling check, the worker will reload the autoscaling
+parameters for each app and put into effect any modifications you have made.</p>
+<h3>Configuration</h3>
+<p>There are two levels of configuration.</p>
+<ol>
+<li>The global configuration file in <code>config.yml</code>. This file controls
+the entire deployed autoscaler app, and sets the limits of the per app autoscaling configuration.
+To update this configuration, the autoscaler app must be redeployed with an updated config
+file containing the desired configuration updates.</li>
+<li>The per app autoscaling configuration found on the app page may be
+adjusted while the app is running and will take effect on the next scaling check performed
+by the worker.</li>
+</ol>
+<h2>Development</h2>
+<h3>Configuration</h3>
+<p>If you run the Autoscaler outside of Cloud Foundry, you will need to provide your own:</p>
+<ul>
+<li>Postgres database server and credentials in the <code>development.postgres</code> option.</li>
+<li>Cloud Foundry org and space in the <code>development.cloud_foundry</code> option.</li>
+</ul>
+<h3>Database Schema</h3>
+<p>On app startup, both the web and worker apps will initialize the database schema
+in RDS. The database schema is located in the <code>sql/</code> directory.</p>
+<ul>
+<li><code>sql/base.sql</code> contains the base database schema and is run on app start <em>only</em>
+if the database has never been initialized.</li>
+<li><code>sql/migrate.sql</code> contains any SQL modifications to an existing database, and
+is run on <em>every</em> app restart.</li>
+<li>Note that this script must be
+<a href="http://stackoverflow.com/questions/1077412/what-is-an-idempotent-operation">idempotent</a>
+(it may be run multiple times on a new OR an old database, and bring both the old and the new databases to have the same schema).</li>
+</ul>
+<h3>Libraries and frameworks</h3>
+<ul>
+<li><a href="http://docs.celeryproject.org/en/latest/index.html">Celery</a>
+is used for scheduling app performance checks and scaling checks.</li>
+<li>The autoscaling application server is built on
+<a href="http://flask.pocoo.org/docs/0.11/">Flask</a>.</li>
+<li>Real-time updates are implemented
+using <a href="http://socket.io/">Socket.IO</a> provided by
+<a href="https://flask-socketio.readthedocs.io/en/latest/">Flask-SocketIO</a>.</li>
+<li>User sessions are managed using
+<a href="https://flask-login.readthedocs.io/en/latest/">Flask-Login</a></li>
+</ul>
+<h2>Deployment in Cloud Foundry</h2>
+<p>For the purpose of the following explanation, "the app" indicates the app you
+want to autoscale.</p>
+<p>To deploy this autoscaler,</p>
+<ul>
+<li>Create a configuration file. You can use <code>example_config.yml</code> as a template.<ul>
+<li><em>REQUIRED</em> set your <code>cloud_foundry</code> config. (see <a href="#configuration-parameters">configuration parameters</a>)</li>
+<li><em>REQUIRED</em> set your <code>auth</code> config. <em>NOTE: these are not Cloud Foundry credentials.</em> (see <a href="#configuration-parameters">configuration parameters</a>)</li>
+<li><em>REQUIRED</em> set your <code>scaling</code> config; feel free to use the default configuration. (see <a href="#configuration-parameters">configuration parameters</a>)</li>
+<li><em>OPTIONAL</em> set your <code>development</code> config; the details you fill in this config will be specific to how you run it locally. </li>
+</ul>
+</li>
+<li>Create a small service instance of <code>hsdp-rds</code> named <code>cfas-rds</code> in the app's
+Cloud Foundry organization. By default, the manifest binds this service to both
+the web and the worker.</li>
+<li>Ensure that you have registered an OAuth2 Client with your Cloud Foundry UAA server.</li>
+<li>There may be one already registered. You can check using the <a href="https://github.com/cloudfoundry/cf-uaac">UAA CLI</a>.</li>
+<li><code>$ uaac target https://uaa.your-cloud.com</code> point the client at your UAA server</li>
+<li><code>$ uaac token client get &lt;your_admin_client&gt;</code> this gets an admin token from the UAA server.</li>
+<li><code>$ uaac clients</code> this will show a list of OAuth2 Clients registered with the UAA server</li>
+<li>
+<p>The autoscaler OAuth2 Client requires the following configuration.</p>
+<ul>
+<li>Scope: <code>cloud_controller.read cloud_controller.write uaa.user</code></li>
+<li>Authorized Grant Types: <code>refresh_token implicit client_credentials authorization_code</code></li>
+<li>Access Token Validity: <code>3600</code> recommended, but not required.</li>
+<li>Refresh Token Validity: <code>157788000</code> (5 years) needs to be a long time at least.</li>
+</ul>
+</li>
+<li>
+<p>Run <code>cf push</code>. This will deploy both the web interface and the worker.</p>
+</li>
+<li>On successful deployment, follow the autoscaling <a href="#autoscaling-workflow">workflow</a>.</li>
+</ul>
+<h2>Global Configuration Parameters</h2>
+<p>The configuration file is expected at <code>./config.yml</code>. The config file,
+<code>./example_config.yml</code>, is provided as a template.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required?</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cloud_foundry</code></td>
+<td><code>dict</code></td>
+<td>Yes</td>
+<td>Client credentials for managing Cloud Foundry Apps.</td>
+</tr>
+<tr>
+<td><code>cloud_foundry.api_host</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Valid CF Cloud Controller host. This should include the scheme and hostname (i.e. https://api.your-cloud-foundry.com).</td>
+</tr>
+<tr>
+<td><code>cloud_foundry.client_id</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Valid CF Client ID to be used in authorizing the autoscaler to talk to Cloud Foundry</td>
+</tr>
+<tr>
+<td><code>cloud_foundry.client_secret</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Valid CF Client Secret to be used in authorizing the autoscaler to talk to Cloud Foundry</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td><code>dict</code></td>
+<td>Yes</td>
+<td>These are the signin credentials for logging into the autoscaler <a href="/signin">user interface</a>. <em>NOTE: these are not Cloud Foundry credentials.</em></td>
+</tr>
+<tr>
+<td><code>auth.username</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Username for logging in at the autoscaler user interface.</td>
+</tr>
+<tr>
+<td><code>auth.password</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Username's password. <em>Use a secure password</em>. The user interface will be available to the public web.</td>
+</tr>
+<tr>
+<td><code>scaling</code></td>
+<td><code>dict</code></td>
+<td>Yes</td>
+<td>These are autoscaling configuration parameters.</td>
+</tr>
+<tr>
+<td><code>scaling.interval</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Specifies (in seconds) how often the autoscaler worker will registered applications to determine if they need to be scaled.</td>
+</tr>
+<tr>
+<td><code>scaling.stats_interval</code></td>
+<td><code>int</code></td>
+<td>Yes</td>
+<td>Specifies (in seconds) how often the autoscaler worker will collect stats about registered applications.</td>
+</tr>
+<tr>
+<td><code>scaling.monitor_interval</code></td>
+<td><code>int</code></td>
+<td>Yes</td>
+<td>Specifies the frequency (in seconds) of real-time updates to the autoscaler's monitoring user interface.</td>
+</tr>
+<tr>
+<td><code>scaling.min_num_instances</code></td>
+<td><code>int</code></td>
+<td>Yes</td>
+<td>Specifies the global, absolute <em>minimum</em> number of CF instances that the autoscaler monitoring user interface will offer to scale down to. This is the lowest value allowed in "Min. Number of Instances" in the "Auto Scaling Parameters" box on the app monitoring page.</td>
+</tr>
+<tr>
+<td><code>scaling.max_num_instances</code></td>
+<td><code>int</code></td>
+<td>Yes</td>
+<td>Specifies the global, absolute <em>maximum</em> number of CF instances that the autoscaler monitoring user interface will offer to scale up to. This is the highest value allowed in "Max. Number of Instances" in the "Auto Scaling Parameters" box on the app monitoring page.</td>
+</tr>
+<tr>
+<td><code>scaling.memory</code></td>
+<td><code>list&lt;int&gt;</code></td>
+<td>Yes</td>
+<td>This is a list of manual scaling settings for memory that are displayed on the app monitoring page under "Manual Scaling Parameters".</td>
+</tr>
+<tr>
+<td><code>scaling.disk</code></td>
+<td><code>list&lt;int&gt;</code></td>
+<td>Yes</td>
+<td>This is a list of manual scaling settings for disk that are displayed on the app monitoring page under "Manual Scaling Parameters".</td>
+</tr>
+<tr>
+<td><code>development</code></td>
+<td><code>dict</code></td>
+<td>No</td>
+<td>Development default values for Cloud Foundry and Postgres to be used when the Autoscaler is <em>NOT</em> deployed in Cloud Foundry.</td>
+</tr>
+<tr>
+<td><code>development.cloud_foundry</code></td>
+<td><code>dict</code></td>
+<td>No</td>
+<td>Default values for Cloud Foundry when the app is not deployed in Cloud Foundry</td>
+</tr>
+<tr>
+<td><code>development.cloud_foundry.organization</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>Valid CF Organization Name used to constrain which apps may be autoscaled</td>
+</tr>
+<tr>
+<td><code>development.cloud_foundry.space</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>Valid CF Space Name used to constrain which apps may be autoscaled</td>
+</tr>
+<tr>
+<td><code>development.postgres</code></td>
+<td><code>dict</code></td>
+<td>No</td>
+<td>Postgres DB configuration. Note that these settings <em>will</em> be overridden if an <code>hsdp-rds</code> DB is bound to the app.</td>
+</tr>
+<tr>
+<td><code>development.postgres.host</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>DB host.</td>
+</tr>
+<tr>
+<td><code>development.postgres.port</code></td>
+<td><code>int</code></td>
+<td>No</td>
+<td>DB port.</td>
+</tr>
+<tr>
+<td><code>development.postgres.user</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>DB user.</td>
+</tr>
+<tr>
+<td><code>development.postgres.password</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>DB user's password.</td>
+</tr>
+<tr>
+<td><code>development.postgres.dbname</code></td>
+<td><code>str</code></td>
+<td>No</td>
+<td>DB name.</td>
+</tr>
+</tbody>
+</table>
+<h2>Compiling Documentation</h2>
+<p>The served HTML documentation at <a href="/help">/help</a> is compiled from this README. The following
+commands may be used to regenerate the documentation HTML in
+<code>app/templates/README.html</code>.</p>
+<ul>
+<li>Ensure you have the python <code>markdown</code> package installed with <code>pip install markdown==2.6.6</code></li>
+<li>Run <code>./gendocs.sh</code> from the project root.</li>
+</ul>

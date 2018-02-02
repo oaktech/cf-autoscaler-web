@@ -1,0 +1,115 @@
+{% extends "_layout.html" %}
+
+{% block body %}
+    <h3>{{ app.app_name }}</h3>
+    <span>
+        <a id="enable-disable-app" class="disable-app btn btn-{{ 'success' if app.enabled else 'warning' }}" href="javascript:void(0);"
+           title="Turns autoscaling on and off. Green is on; yellow is off."
+           data-toggle="tooltip"
+            >{{ 'Disable Autoscaling' if app.enabled else 'Enable Autoscaling' }}</a>
+        &nbsp;&nbsp;<a href="{{ app.history_url }}">View History</a>
+    </span>
+    <span id="last-update-time" class="pull-right"></span>
+    <input type="hidden" id="app-id" value="{{ app.app_id }}">
+
+    <div class="row padded-row">
+        <div class="col-md-6">
+            <h4>Num Instances
+                <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                      title="This chart tracks the number of instances that an app is using over time. When the app scales up, you'll see the number of instances increase; for scale down, you'll see the number of instances decrease."></a>
+            </h4>
+            <div id="num-instances" data-app-id="{{ app.app_id }}"></div>
+        </div>
+        <div class="col-md-6">
+            <h4>CPU & Mem Usage
+                <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                      title="This chart tracks the app's average CPU and Memory Usage percentages over time. The averages are taken over the CPU and Memory usage values of the individual instances that host the app."></a>
+            </h4>
+            <div id="usage" data-app-id="{{ app.app_id }}"></div>
+        </div>
+    </div>
+
+    <div class="row padded-row">
+        <div class="col-md-6">
+            <h4 class="align-center">Average CPU Usage
+                <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                      title="This is a gauge of the average CPU Usage percentage of all instances hosting the app. The averages are calculated using the same method as in the CPU & Mem Usage chart."></a>
+            </h4>
+            <div id="cpu-gauge"></div>
+        </div>
+        <div class="col-md-6">
+            <h4 class="align-center">Average Memory Usage
+                <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                      title="This is a gauge of the average Memory Usage percentage of all instances hosting the app. The averages are calculated using the same method as in the CPU & Mem Usage chart."></a>
+            </h4>
+            <div id="memory-gauge"></div>
+        </div>
+    </div>
+
+    <div class="row padded-row">
+        <div class="col-md-12">
+            <h4>Instance CPU, Memory, and Disk Usage
+                <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                      title="This chart shows the CPU, Memory, and Disk Usage percentages for the individual Cloud Foundry instances hosting the app. Each bar stack represents an individual instance."></a>
+            </h4>
+            <div id="instance-stats-chart"></div>
+        </div>
+    </div>
+
+    <div class="row padded-row">
+        <div class="col-md-6">
+            {{ scaling_config|safe }}
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Manual Scaling Parameters
+                    <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                          title="These controls allow you to manually adjust your app's resources. All these controls work independently of Autoscaling being enabled or disabled. Be aware that all the controls below are subject to the app's org/space constraints on memory and disk."></a>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-12">
+                    <h3 style="margin-top: 5px">Memory
+                        <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                              title="Clicking any of the memory values below will update your app instances to that amount of memory. Note that modifying memory requires all app instances to restart which may interrupt your traffic, so be careful."></a>
+                    </h3>
+                    <select class="form-control scale-memory">
+    {% for mem in scaling_memory %}
+                        <option value="{{ mem }}">{{ mem }}MB</option>
+    {% endfor %}
+                    </select>
+                    <h3>Disk
+                        <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                              title="Clicking any of the disk values below will update your app instances to that amount of disk. Note that modifying disk requires all app instances to restart which may interrupt your traffic, so be careful."></a>
+                    </h3>
+
+                    <select class="form-control scale-disk">
+    {% for disk in scaling_disk %}
+                        <option value="{{ disk }}">{{ disk }}MB</option>
+    {% endfor %}
+                    </select>
+                    <h3>Number of Instances
+                        <a href="#" class="glyphicon glyphicon-question-sign cfas-help" data-toggle="tooltip"
+                              title="Clicking any of the instance counts below will update your app to run on that number of instances. Modifying number of instances does not require an app restart. Unless Autoscaling is disabled, any changes to this may be modified."></a>
+                    </h3>
+                    <select class="form-control scale-instances">
+    {% for num_instances in range(scaling_num_instances['min_num_instances'], scaling_num_instances['max_num_instances'] + 1) %}
+                        <option value="{{ num_instances }}">{{ num_instances }}</option>
+    {% endfor %}
+                    </select>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="manual-scaling-error" class="alert scaling-error hide"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/lib/socket.io-1.4.8.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/monitor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app-view.js') }}"></script>
+{% endblock %}

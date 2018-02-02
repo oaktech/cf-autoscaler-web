@@ -1,0 +1,46 @@
+{% extends "_layout.html" %}
+{% block body %}
+    <h3><a href="{{ app.url }}">{{ app.app_name }}</a></h3>
+    <a id="refresh-chart" class="pull-right btn btn-success" href="javascript:void(0);"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Refresh</a>
+    <br>
+    <br>
+    <div id="app-stats-history"></div>
+    <div class="col-md-3">
+        <label for="chart-axes">Chart Layout</label>
+        <select id="chart-axes" class="form-control">
+            <option value="num_instances,cpu,mem">Num Instances, CPU & Memory</option>
+            <option value="num_instances,cpu">Num Instances & CPU</option>
+            <option value="num_instances,mem">Num Instances & Memory</option>
+            <option value="cpu,mem">CPU & Memory</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="chart-interval">Show History for the past</label>
+        <select id="chart-interval" class="form-control">
+            <option value="604800" selected="">7 Days</option>
+            <option value="432000" selected="">5 Days</option>
+            <option value="259200">3 Days</option>
+            <option value="86400">24 Hours</option>
+            <option value="43200">12 Hours</option>
+            <option value="21600">6 Hours</option>
+            <option value="14400">4 Hours</option>
+            <option value="7200">2 Hours</option>
+            <option value="3600">60 Minutes</option>
+            <option value="1800">30 Minutes</option>
+            <option value="900">15 Minutes</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="chart-resolution">Chart Resolution</label>
+        <select id="chart-resolution" class="form-control">
+            <option value="300">High</option>
+            <option value="150" selected="">Medium</option>
+            <option value="60">Low</option>
+        </select>
+    </div>
+
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/app-history.js') }}"></script>
+{% endblock %}

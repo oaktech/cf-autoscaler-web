@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <script src="{{ url_for('static', filename='js/lib/jquery-2.2.4.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/lodash.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/d3-3.5.6.min-77adef17.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/c3-0.4.11.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/status.js') }}"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Lato" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/c3.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    {% block head -%}
+    {%- endblock %}
+</head>
+<body>
+    {% include '_nav.html' %}
+<div class="container">
+    <div id="global-error-message" class="alert alert-danger {{ '' if error_message is defined and error_message else 'hide' }}">
+        {{ error_message }}
+        <span class="pull-right">
+            <span class="glyphicon glyphicon-remove"></span>
+        </span>
+    </div>
+    {% block body %}
+    {% endblock %}
+</div>
+
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>
+

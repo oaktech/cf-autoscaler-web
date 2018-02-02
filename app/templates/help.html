@@ -1,0 +1,6 @@
+{% extends "_layout.html" %}
+
+{% block body %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/github.css') }}">
+    {% include "README.html" %}
+{% endblock %}

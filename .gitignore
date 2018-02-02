@@ -1,0 +1,10 @@
+.idea/
+.DS_Store
+*.iml
+*.pyc
+*.log
+manifest.*.yml
+*.swp
+*.swo
+tags
+tags.*

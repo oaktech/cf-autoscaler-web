@@ -1,0 +1,38 @@
+{% set last_app = session.get('last_app', None) %}
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">HSDP Autoscaler for Cloud Foundry</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="{{ 'active' if '/' == request.path else '' }}">
+                    <a href="/">Imported Apps</a>
+                </li>
+                <li class="{{ 'active' if '/apps/available' == request.path else '' }}">
+                    <a href="/apps/available">Available Apps</a>
+                </li>
+    {% if last_app %}
+                <li class="{{ 'active' if '/apps/' + last_app['app_id'] == request.path else '' }}">
+                    <a href="/apps/{{ last_app['app_id'] }}">{{ last_app['app_name'] }}</a>
+                </li>
+    {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a  class="dropdown-toggle" data-toggle="dropdown" role="button"
+                        aria-haspopup="true" aria-expanded="false" href="javascript:void(0);">
+                        <em>{{ request.user.user_name }}</em> <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/">Home</a>
+                            <a href="/config">View Configuration</a>
+                            <a href="/logout">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
