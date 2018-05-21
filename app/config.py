@@ -124,12 +124,12 @@ def get_env_config():
         'CFAS_SPACE_ID', space_id)
     validate_ssl = _parse_bool(os.environ.get(
         'CFAS_VALIDATE_SSL', validate_ssl))
-    scaling_monitor_interval = os.environ.get(
-        'CFAS_SCALING_MONITOR_INTERVAL', scaling_monitor_interval)
-    scaling_min_instances = os.environ.get(
-        'CFAS_SCALING_MIN_INSTANCES', scaling_min_instances)
-    scaling_max_instances = os.environ.get(
-        'CFAS_SCALING_MAX_INSTANCES', scaling_max_instances)
+    scaling_monitor_interval = int(os.environ.get(
+        'CFAS_SCALING_MONITOR_INTERVAL', scaling_monitor_interval))
+    scaling_min_instances = int(os.environ.get(
+        'CFAS_SCALING_MIN_INSTANCES', scaling_min_instances))
+    scaling_max_instances = int(os.environ.get(
+        'CFAS_SCALING_MAX_INSTANCES', scaling_max_instances))
 
 
 def get_old_config(ignore_parse_failure=True):
