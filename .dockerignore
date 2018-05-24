@@ -1,0 +1,9 @@
+.DS_Store
+LICENSE
+.envvars
+.git/
+__pycache__/
+manifest.*yml
+tags*
+*.swp
+*.pyc

@@ -1,4 +1,5 @@
 .idea/
+.envvars
 .DS_Store
 *.iml
 *.pyc
