@@ -6,7 +6,7 @@ applications:
   memory: 128M
   disk_quota: 192M
   buildpack: python_buildpack
-  stack: cflinuxfs2
+  stack: cflinuxfs3
   command: python server.py
   env:
     CFAS_ORG_NAME: 
